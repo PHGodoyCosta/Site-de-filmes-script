@@ -1,0 +1,8 @@
+.env
+__pycache__/
+reqs/
+auth.py
+fixed_variables.txt
+tmp.txt
+token.key
+variables.py
