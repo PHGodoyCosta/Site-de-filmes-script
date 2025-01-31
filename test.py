@@ -1,1 +1,0 @@
-print("Sou um script bacana")

@@ -9,14 +9,18 @@ class One_Drive:
         self.access_token = str(open("token.key", "r+").read())
         self.filmes_folder_id = "1642E726B682B518!72464"
         self.chunk_size = 10 * 1024 * 1024
+        self.absolut_path = os.path.dirname(os.path.abspath(__file__))
     
     def refresh_access_token(self):
         self.access_token = self.auth.get_fixed_access_token()
-        with open("token.key", "w+") as f:
+        with open(f"{self.absolut_path}/token.key", "w+") as f:
             f.write(self.access_token)
         
-    def create_main_folder(self, folder):
-        url = f'https://graph.microsoft.com/v1.0/me/drive/items/{self.filmes_folder_id}/children'
+    def create_folder(self, folder_name, dad_folder_id=None):
+        if dad_folder_id == None:
+            dad_folder_id = self.filmes_folder_id
+            
+        url = f'https://graph.microsoft.com/v1.0/me/drive/items/{dad_folder_id}/children'
         
         headers = {
             'Authorization': f'Bearer {self.access_token}',
@@ -24,7 +28,7 @@ class One_Drive:
         }
 
         data = {
-            "name": folder,
+            "name": folder_name,
             "folder": {},
             "@microsoft.graph.conflictBehavior": "rename"
         }
@@ -36,7 +40,7 @@ class One_Drive:
         if "error" in data:
             if data["error"]["code"] == "InvalidAuthenticationToken":
                 self.refresh_access_token()
-                return self.create_main_folder(folder)
+                return self.create_folder(folder_name)
         
         return data["id"]
     

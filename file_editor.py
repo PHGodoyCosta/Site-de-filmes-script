@@ -2,6 +2,7 @@ import os
 import ffmpeg
 from datetime import timedelta
 from moviepy import VideoFileClip
+from one_drive import One_Drive
 import av
 import subprocess
 
@@ -11,6 +12,7 @@ class Editor:
         self.movie_name = self.file_name.split(".")[0]
         self.file_path = f"{os.getcwd()}/{self.file_name}"
         self.absolut_path = os.path.dirname(os.path.abspath(__file__))
+        self.one_drive = One_Drive()
     
     def _extrair_audio(self, faixa_index, output_file, type="copy"):
         if type == "copy":
@@ -20,7 +22,7 @@ class Editor:
                 print("Erro FFMPEG")
                 print(e)
         
-    def _extract_audios(self, faixas):
+    def _extract_audios(self, faixas, folder_id):
         for i in range(0, len(faixas)):
             faixa = faixas[i]
             folder_name = f"Faixa_{i}"
@@ -30,10 +32,10 @@ class Editor:
             if not os.path.isdir(folder_name):
                 os.mkdir(folder_name)
             os.chdir(folder_name)
-            
+            one_drive_folder = self.one_drive.create_folder(folder_name, folder_id)
             
             self._extrair_audio(i, file_name)
-            self.cutting_files(file_path, type="audio")
+            self.cutting_files(file_path, one_drive_folder, type="audio")
 
             os.chdir("..")
     
@@ -47,7 +49,7 @@ class Editor:
             print(f"Erro ao extrair legenda!")
             raise Exception(e)
     
-    def _extract_legendas(self, subtitles):
+    def _extract_legendas(self, subtitles, folder_id):
         for i in range(0, len(subtitles) - 1):
             subtitle = subtitles[i]
             if subtitle["language"] == "und":
@@ -61,8 +63,17 @@ class Editor:
             os.chdir("legendas")
             
             self._extract_legenda(file_name, i)
+            self.one_drive.upload_file(folder_id, file_name)
             
             os.chdir(self.absolut_path)
+    
+    def check_file_length(self, file_path):
+        byte_size = os.path.getsize(file_path)
+        mb_size = int((byte_size / 1064) / 1064)
+        
+        if (mb_size < 30):
+            return True
+        return False
     
     def _format_hour_number(self, number):
         if number < 10:
@@ -170,7 +181,7 @@ class Editor:
         except subprocess.CalledProcessError as e:
             print(f"Erro ao cortar o arquivo: {e}")
     
-    def cutting_files(self, file_path, type="movie"):
+    def cutting_files(self, file_path, folder_id, type="movie"):
         if type == "movie":
             duration = self.get_movie_duration(file_path)
         elif type == "audio":
@@ -191,9 +202,16 @@ class Editor:
             #self.cut_movie_file_moviepy(file_path, f"{counter}.{extension_file}", start=cut_duration, end=cut_time)
             #self.cut_movie_file_av(file_path, f"{counter}.{extension_file}", start=cut_duration, end=cut_time)
             if type == "audio":
-                self.cut_audio_file(file_path, f"{counter}.m4a", start=cut_duration, end=(cut_time + cut_duration))
+                file_name = f"{counter}.m4a"
+                self.cut_audio_file(file_path, file_name, start=cut_duration, end=(cut_time + cut_duration))
             else:
-                self.cut_movie_file_subprocess(file_path, f"{counter}.{extension_file}", start=cut_duration, end=cut_time)
+                file_name = f"{counter}.{extension_file}"
+                self.cut_movie_file_subprocess(file_path, file_name, start=cut_duration, end=cut_time)
+                if not self.check_file_length(file_name):
+                    print("ALERTA! CORTES GRANDES")
+                    print("Verificar os próximos")
+                    input("> ")
+            self.one_drive.upload_file(folder_id, file_name)
             
             counter += 1
             cut_duration += cut_time
@@ -208,9 +226,9 @@ class Editor:
         
     
     def _extract_movie_video(self):
-        if not os.path.isdir(self.movie_name):
-            os.mkdir(self.movie_name)
-        os.chdir(self.movie_name)
+        if not os.path.isdir("Filme_Video"):
+            os.mkdir("Filme_Video")
+        os.chdir("Filme_Video")
         
         try:
             ffmpeg.input(self.file_path).output(self.file_name, an=None, c='copy').run()
@@ -258,14 +276,14 @@ class Editor:
     
 if __name__ == "__main__":
     starter = Editor("filme2.mkv")
-    starter.temp()
+    #starter.temp()
     #starter.cut_movie_file(starter.file_path, "corte_teste.mp4", start=timedelta(minutes=1), end=timedelta(minutes=1))
     # duration = starter.get_movie_duration(starter.file_path)
     # print(duration)
     #starter._extract_movie_video()
     
-    # legendas = starter._list_subtitles_in_file()
-    # print(legendas)
+    legendas = starter._list_subtitles_in_file()
+    print(legendas)
     # starter._extract_legendas(legendas)
     
     # audios = starter._list_audios_in_file()
