@@ -1,16 +1,11 @@
+from moviepy import *
 from datetime import timedelta
 
-#time = timedelta(hours=10, minutes=50, seconds=2)
+video = VideoFileClip("filme.mp4")
 
-#time -= timedelta(seconds=10)
+start_time = timedelta(minutes=20).total_seconds()
+end_time = timedelta(minutes=21).total_seconds()
 
-time = timedelta(seconds=5)
+cut_video = video.subclipped(start_time, end_time)
 
-time2 = timedelta(seconds=10)
-
-# if time == time2:
-#     print("VERDADE")
-# else:
-#     print("FALSO")
-
-print(time2 - time)
+cut_video.write_videofile("corte_movie.mp4", codec="libx264")
