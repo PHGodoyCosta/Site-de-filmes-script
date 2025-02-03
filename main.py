@@ -3,13 +3,14 @@ from file_editor import Editor
 import os
 
 class Main:
-    def __init__(self, file_name):
+    def __init__(self, file_name, tempMode=False):
         self.file_name = file_name
         self.movie_name = self.file_name.split(".")[0]
         self.file_path = f"{os.getcwd()}/{self.file_name}"
         self.one_drive = One_Drive()
         self.editor = Editor(self.file_name)
-        self.main_folder_id = self.one_drive.create_folder(self.file_name, self.one_drive.filmes_folder_id)
+        if not tempMode:
+            self.main_folder_id = self.one_drive.create_folder(self.movie_name, self.one_drive.filmes_folder_id)
     
     # def temp(self):
     #     self.editor.cutting_files(file)
@@ -40,7 +41,15 @@ class Main:
         self.extract_and_cut_audios()
         #self.editor
     
+    def temp(self):
+        #audios = self.editor._list_audios_in_file()
+        #print(audios)
+        #self.editor._extrair_audio(0, "testing_function.aac")
+        self.editor.cutting_files(f"{self.editor.absolut_path}/Faixa_0/testing_function.aac", "one_drive_folder", type="audio")
+        
 if __name__ == "__main__":
-    starter = Main("filme2.mkv")
+    starter = Main("filme3.mkv", tempMode=False)
     starter.main()
+    #starter.temp()
+    
     

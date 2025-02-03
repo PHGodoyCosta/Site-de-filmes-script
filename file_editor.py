@@ -17,7 +17,11 @@ class Editor:
     def _extrair_audio(self, faixa_index, output_file, type="copy"):
         if type == "copy":
             try:
-                ffmpeg.input(self.file_path).output(output_file, codec='copy', map=f'0:a:{faixa_index}').run()
+                #ffmpeg.input(self.file_path).output(output_file, codec='copy', map=f'0:a:{faixa_index}').run()
+                #ffmpeg.input(self.file_path).output(output_file, codec='aac', map=f'0:a:{faixa_index}').run()
+                ##ffmpeg.input(self.file_path).output(output_file, c='aac', map=f'0:a:{faixa_index}', strict='experimental', f='adts', avoid_negative_ts='make_zero').run()
+                #ffmpeg.input(self.file_path).output(output_file, c='aac', map=f'0:a:{faixa_index}', strict='experimental', f='adts', avoid_negative_ts='make_zero', map_metadata='-1', copyts=None, t=1200).run()
+                ffmpeg.input(self.file_path).output(output_file, codec='aac', map=f'0:a:{faixa_index}', ac=2, ar=44100, f='adts').run()
             except ffmpeg.Error as e:
                 print("Erro FFMPEG")
                 print(e)
@@ -26,7 +30,7 @@ class Editor:
         for i in range(0, len(faixas)):
             faixa = faixas[i]
             folder_name = f"Faixa_{i}"
-            file_name = f"{folder_name}.{faixa['codec']}"
+            file_name = f"{folder_name}.aac"
             file_path = f"{self.absolut_path}/{folder_name}/{file_name}"
             
             if not os.path.isdir(folder_name):
@@ -151,70 +155,92 @@ class Editor:
         if start == timedelta(seconds=0):
             print("Primeiro Clipe")
             try:
-                ffmpeg.input(file_path).output(name_file, t=end.total_seconds(), c='copy', reset_timestamps=1).run()
+                #ffmpeg.input(file_path).output(name_file, t=end.total_seconds(), c='copy', reset_timestamps=1).run()
+                ffmpeg.input(file_path).output("output.m3u8", t=end.total_seconds(), c="copy", f="hls", hls_time=60, hls_list_size=0).run()
             except ffmpeg.Error as e:
                 print(f"Erro ao cortar o arquivo {name_file}")
                 raise Exception(e)
         else:
             print("Outros Clipes")
             try:
-                ffmpeg.input(file_path, ss=start.total_seconds()).output(name_file, t=end.total_seconds(), c='copy', reset_timestamps=1).run()
+                #ffmpeg.input(file_path, ss=start.total_seconds()).output(name_file, t=end.total_seconds(), c='copy', reset_timestamps=1).run()
+                ffmpeg.input(file_path, ss=start.total_seconds()).output("output.m3u8", t=end.total_seconds(), c="copy", f="hls", hls_time=60, hls_list_size=0).run()
             except ffmpeg.Error as e:
                 print(f"Erro ao cortar o arquivo {name_file}")
                 raise Exception(e)
     
     def cut_audio_file(self, file_path, name_file, start, end):
-        command = [
-            'ffmpeg', 
-            '-i', file_path,
-            '-ss', str(start),
-            '-to', str(end),
-            '-c:a', 'aac',
-            '-b:a', '256k',
-            '-ar', '44100',
-            name_file
-        ]
+        # command = [
+        #     'ffmpeg', 
+        #     '-i', file_path,
+        #     '-ss', str(start),
+        #     '-to', str(end),
+        #     '-c:a', 'aac',
+        #     '-b:a', '256k',
+        #     '-ar', '44100',
+        #     name_file
+        # ]
         
+        # try:
+        #     subprocess.run(command, check=True)
+        #     print(f"Arquivo cortado com sucesso: {name_file}")
         try:
-            subprocess.run(command, check=True)
-            print(f"Arquivo cortado com sucesso: {name_file}")
+            ffmpeg.input(file_path, ss=start.total_seconds()).output("output.m3u8", c="copy", f="hls", hls_time=60, hls_list_size=0).run()
         except subprocess.CalledProcessError as e:
             print(f"Erro ao cortar o arquivo: {e}")
     
     def cutting_files(self, file_path, folder_id, type="movie"):
         if type == "movie":
-            duration = self.get_movie_duration(file_path)
+            try:
+                ffmpeg.input(file_path).output("output.m3u8", c="copy", reset_timestamps=1, f="hls", hls_time=60, hls_list_size=0).run()
+            except ffmpeg.Error as e:
+                print(f"Erro ao cortar o Vídeo: {e}")
+                raise Exception(e)
         elif type == "audio":
-            duration = self.get_audio_duration(file_path)
-        cut_duration = timedelta(seconds=0)
-        extension_file = file_path.split(".")[len(file_path.split(".")) - 1]
-        counter = 0
+            try:
+                ffmpeg.input(file_path).output("output.m3u8", c="copy", f="hls", hls_time=60, hls_list_size=0).run()
+            except ffmpeg.Error as e:
+                print(f"Erro ao cortar o audio: {e}")
+                raise Exception(e)
         
-        while cut_duration < duration:
-            if cut_duration + timedelta(minutes=1) < duration:
-                cut_time = timedelta(minutes=1)
-            else:
-                cut_time = duration - cut_duration
-            
-            #print(f"START: {cut_duration} - END: {cut_time}")
-            #self.cut_movie_file(file_path, f"{counter}.{extension_file}", start=cut_duration, end=cut_time)
-            #self.remux_video(f"{counter}.{extension_file}", f"{counter}_remux.{extension_file}")
-            #self.cut_movie_file_moviepy(file_path, f"{counter}.{extension_file}", start=cut_duration, end=cut_time)
-            #self.cut_movie_file_av(file_path, f"{counter}.{extension_file}", start=cut_duration, end=cut_time)
-            if type == "audio":
-                file_name = f"{counter}.m4a"
-                self.cut_audio_file(file_path, file_name, start=cut_duration, end=(cut_time + cut_duration))
-            else:
-                file_name = f"{counter}.{extension_file}"
-                self.cut_movie_file_subprocess(file_path, file_name, start=cut_duration, end=cut_time)
-                if not self.check_file_length(file_name):
-                    print("ALERTA! CORTES GRANDES")
-                    print("Verificar os próximos")
-                    input("> ")
+        files = [f for f in os.listdir() if f.endswith((".ts", ".m3u8"))]
+        
+        for file_name in files:
             self.one_drive.upload_file(folder_id, file_name)
             
-            counter += 1
-            cut_duration += cut_time
+        # if type == "movie":
+        #     duration = self.get_movie_duration(file_path)
+        # elif type == "audio":
+        #     duration = self.get_audio_duration(file_path)
+        # cut_duration = timedelta(seconds=0)
+        # extension_file = file_path.split(".")[len(file_path.split(".")) - 1]
+        # counter = 0
+        
+        # while cut_duration < duration:
+        #     if cut_duration + timedelta(minutes=1) < duration:
+        #         cut_time = timedelta(minutes=1)
+        #     else:
+        #         cut_time = duration - cut_duration
+            
+        #     #print(f"START: {cut_duration} - END: {cut_time}")
+        #     #self.cut_movie_file(file_path, f"{counter}.{extension_file}", start=cut_duration, end=cut_time)
+        #     #self.remux_video(f"{counter}.{extension_file}", f"{counter}_remux.{extension_file}")
+        #     #self.cut_movie_file_moviepy(file_path, f"{counter}.{extension_file}", start=cut_duration, end=cut_time)
+        #     #self.cut_movie_file_av(file_path, f"{counter}.{extension_file}", start=cut_duration, end=cut_time)
+        #     if type == "audio":
+        #         file_name = f"{counter}.m4a"
+        #         self.cut_audio_file(file_path, file_name, start=cut_duration, end=(cut_time + cut_duration))
+        #     else:
+        #         file_name = f"{counter}.{extension_file}"
+        #         self.cut_movie_file_subprocess(file_path, file_name, start=cut_duration, end=cut_time)
+        #         if not self.check_file_length(file_name):
+        #             print("ALERTA! CORTES GRANDES")
+        #             print("Verificar os próximos")
+        #             input("> ")
+        #     self.one_drive.upload_file(folder_id, file_name)
+            
+        #     counter += 1
+        #     cut_duration += cut_time
     
     def temp(self):
         os.chdir("filme")

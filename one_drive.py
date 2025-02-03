@@ -6,10 +6,10 @@ class One_Drive:
     def __init__(self):
         self.auth = Auth()
         #self.access_token = self.auth.get_fixed_access_token()
-        self.access_token = str(open("token.key", "r+").read())
+        self.absolut_path = os.path.dirname(os.path.abspath(__file__))
+        self.access_token = str(open(f"{self.absolut_path}/token.key", "r+").read())
         self.filmes_folder_id = "1642E726B682B518!72464"
         self.chunk_size = 10 * 1024 * 1024
-        self.absolut_path = os.path.dirname(os.path.abspath(__file__))
     
     def refresh_access_token(self):
         self.access_token = self.auth.get_fixed_access_token()
