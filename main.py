@@ -1,6 +1,7 @@
 from one_drive import One_Drive
 from file_editor import Editor
 from db import DB
+from moviedb import MovieDB
 import json
 import os
 
@@ -8,7 +9,9 @@ class Main:
     def __init__(self, tempMode=False):
         self.absolut_path = os.path.dirname(os.path.abspath(__file__))
         self.preload = json.loads(open(f"{self.absolut_path}/preload.json", "r+").read())
-        self.file_name = self.preload["name"]
+        self.moviedb = MovieDB()
+        self.file_name, self.backdrop, self.poster = self.moviedb.find_movie_by_id(self.preload["movieId"])
+        #self.file_name = self.preload["name"]
         
         if os.path.isabs(self.preload["local"]):
             self.file_path = self.preload["local"]
@@ -31,11 +34,12 @@ class Main:
         audios_folder_id = self.one_drive.create_folder("Audios", self.main_folder_id)
         audios = self.editor._list_audios_in_file()
         print(audios)
-        folder_id = self.editor._extract_audios(audios, audios_folder_id)
+        folders_id = self.editor._extract_audios(audios, audios_folder_id)
         
-        m38u_id = self.one_drive.get_m3u8_file_id(folder_id)
-        filme_db = self.db.get_filme_by_hash(filme_hash)[0]
-        return self.db.insert_audio(folder_id, m38u_id, filme_db[0])
+        for folder_id in folders_id:
+            m38u_id = self.one_drive.get_m3u8_file_id(folder_id)
+            filme_db = self.db.get_filme_by_hash(filme_hash)[0]
+            return self.db.insert_audio(folder_id, m38u_id, filme_db[0])
     
     def extract_legendas(self):
         subtitles_folder_id = self.one_drive.create_folder("Legendas", self.main_folder_id)
@@ -52,7 +56,7 @@ class Main:
         os.chdir("..")
         
         m38u_id = self.one_drive.get_m3u8_file_id(videos_folder_id)
-        return self.db.insert_filme(self.preload["name"], videos_folder_id, m38u_id)
+        return self.db.insert_filme(self.preload["name"], videos_folder_id, m38u_id, self.poster, self.backdrop)
     
     def main(self):
         self.extract_legendas()
@@ -61,14 +65,21 @@ class Main:
         #self.editor
     
     def temp(self):
-        #audios = self.editor._list_audios_in_file()
-        #print(audios)
+        faixas = self.editor._list_audios_in_file()
+        print(faixas)
+        
+        for i in range(0, len(faixas)):
+            faixa = faixas[i]
+            folder_name = f"Faixa_{i}"
+            file_name = f"{folder_name}.aac"
+            
+            self.editor._extrair_audio(i, file_name)
         #self.editor._extrair_audio(0, "testing_function.aac")
-        self.editor.cutting_files(f"{self.editor.absolut_path}/Faixa_0/testing_function.aac", "one_drive_folder", type="audio")
+        #self.editor.cutting_files(f"{self.editor.absolut_path}/Faixa_0/testing_function.aac", "one_drive_folder", type="audio")
         
 if __name__ == "__main__":
-    starter = Main(tempMode=False)
-    starter.main()
-    #starter.temp()
+    starter = Main(tempMode=True)
+    #starter.main()
+    starter.temp()
     
     

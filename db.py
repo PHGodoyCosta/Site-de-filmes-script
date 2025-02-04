@@ -31,10 +31,10 @@ class DB:
         
         return self.cursor.fetchall()
     
-    def insert_filme(self, name, folder_id, hls_id):
+    def insert_filme(self, name, folder_id, hls_id, poster, backdrop):
         hash = uuid4()
         
-        self.cursor.execute(f'INSERT INTO filmes (hash, name, folder_id, hls_id) VALUES ("{hash}", "{name}", "{folder_id}", "{hls_id}");')
+        self.cursor.execute(f'INSERT INTO filmes (hash, name, folder_id, hls_id, poster, backdrop) VALUES ("{hash}", "{name}", "{folder_id}", "{hls_id}", "{poster}", "{backdrop}");')
         
         self.con.commit()
         

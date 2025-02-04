@@ -28,6 +28,8 @@ class Editor:
                 print(e)
         
     def _extract_audios(self, faixas, folder_id):
+        one_drive_folders = []
+        
         for i in range(0, len(faixas)):
             faixa = faixas[i]
             folder_name = f"Faixa_{i}"
@@ -38,13 +40,14 @@ class Editor:
                 os.mkdir(folder_name)
             os.chdir(folder_name)
             one_drive_folder = self.one_drive.create_folder(folder_name, folder_id)
+            one_drive_folders.append(one_drive_folder)
             
             self._extrair_audio(i, file_name)
             self.cutting_files(file_path, one_drive_folder, type="audio")
 
             os.chdir("..")
             
-            return one_drive_folder
+        return one_drive_folders
     
     def _extract_legenda(self, file_name, index):
         try:
