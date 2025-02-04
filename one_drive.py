@@ -1,6 +1,7 @@
 from auth import Auth
 import os
 import requests
+import json
 
 class One_Drive:
     def __init__(self):
@@ -8,6 +9,7 @@ class One_Drive:
         #self.access_token = self.auth.get_fixed_access_token()
         self.absolut_path = os.path.dirname(os.path.abspath(__file__))
         self.access_token = str(open(f"{self.absolut_path}/token.key", "r+").read())
+        self.preload = self.preload = json.loads(open(f"{self.absolut_path}/preload.json", "r+").read())
         self.filmes_folder_id = "1642E726B682B518!72464"
         self.chunk_size = 10 * 1024 * 1024
     
@@ -95,6 +97,34 @@ class One_Drive:
         
         return data["uploadUrl"]
     
+    def list_files(self, folder_id):
+        url = f"https://graph.microsoft.com/v1.0/me/drive/items/{folder_id}/children"
+        
+        headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
+        
+        req = requests.get(url, headers=headers)
+        
+        data = req.json()
+        
+        if "error" in data:
+            if data["error"]["code"] == "InvalidAuthenticationToken":
+                self.refresh_access_token()
+                return self.list_files(folder_id)
+        
+        return data
+    
+    def get_m3u8_file_id(self, folder_id):
+        files = self.list_files(folder_id)
+        
+        for file in files["value"]:
+            if file["name"] == "output.m3u8":
+                return str(file["id"])
+        
+        return False
+        
+    
     def upload_file(self, folder_id, file_path):
         file_size = os.path.getsize(file_path)
         file_name = os.path.basename(file_path)
@@ -165,4 +195,6 @@ if __name__ == "__main__":
     
     #starter.download_file()
     #print(starter.get_downloads_frames_links(starter.filmes_folder_id))
-    starter.upload_file(starter.filmes_folder_id, "phonk.webm")
+    id = starter.get_m3u8_file_id("1642E726B682B518!166366")
+    print(id)
+    #starter.upload_file(starter.filmes_folder_id, "phonk.webm")

@@ -7,10 +7,11 @@ import av
 import subprocess
 
 class Editor:
-    def __init__(self, file_name):
+    def __init__(self, file_name, file_path, file_extension):
         self.file_name = file_name
         self.movie_name = self.file_name.split(".")[0]
-        self.file_path = f"{os.getcwd()}/{self.file_name}"
+        self.file_path = file_path
+        self.file_extension = file_extension
         self.absolut_path = os.path.dirname(os.path.abspath(__file__))
         self.one_drive = One_Drive()
     
@@ -42,6 +43,8 @@ class Editor:
             self.cutting_files(file_path, one_drive_folder, type="audio")
 
             os.chdir("..")
+            
+            return one_drive_folder
     
     def _extract_legenda(self, file_name, index):
         try:
@@ -257,7 +260,7 @@ class Editor:
         os.chdir("Filme_Video")
         
         try:
-            ffmpeg.input(self.file_path).output(self.file_name, an=None, c='copy').run()
+            ffmpeg.input(self.file_path).output(f"filme.{self.file_extension}", an=None, c='copy').run()
         except ffmpeg.Error as e:
             print("Erro ao executar ffmpeg:")
             raise Exception(e)
@@ -301,7 +304,7 @@ class Editor:
     
     
 if __name__ == "__main__":
-    starter = Editor("filme2.mkv")
+    starter = Editor("Paulo Apostolo de Cristo", "/home/phgodoycosta/Downloads/torrents/Paulo, Apóstolo de Cristo (720p) [DUBLADO] Acesse o ORIGINAL WWW.BLUDV.COM/Paulo.Apóstolo.de.Cristo.2018.720p.BluRay.x264.DUBLADO-WWW.BLUDV.COM.mp4", "mp4")
     #starter.temp()
     #starter.cut_movie_file(starter.file_path, "corte_teste.mp4", start=timedelta(minutes=1), end=timedelta(minutes=1))
     # duration = starter.get_movie_duration(starter.file_path)

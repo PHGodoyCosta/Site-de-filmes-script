@@ -1,3 +1,5 @@
 requests
 ffmpeg-python
 moviepy
+mysql-connector-python
+python-dotenv
