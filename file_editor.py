@@ -4,6 +4,8 @@ from datetime import timedelta
 from moviepy import VideoFileClip
 from one_drive import One_Drive
 import av
+from utils import Utils
+from db import DB
 import subprocess
 
 class Editor:
@@ -12,6 +14,8 @@ class Editor:
         self.movie_name = self.file_name.split(".")[0]
         self.file_path = file_path
         self.file_extension = file_extension
+        self.utils = Utils()
+        self.db = DB()
         self.absolut_path = os.path.dirname(os.path.abspath(__file__))
         self.one_drive = One_Drive()
     
@@ -59,7 +63,7 @@ class Editor:
             print(f"Erro ao extrair legenda!")
             raise Exception(e)
     
-    def _extract_legendas(self, subtitles, folder_id):
+    def _extract_legendas(self, subtitles, folder_id, filme_hash):
         for i in range(0, len(subtitles) - 1):
             subtitle = subtitles[i]
             if subtitle["language"] == "und":
@@ -68,12 +72,17 @@ class Editor:
                 file_name = f"legenda_{subtitle['language']}.srt"
             #file_path = f"{self.absolut_path}/legendas/{file_name}"
             
-            if not os.path.isdir("legendas"):
-                os.mkdir("legendas")
-            os.chdir("legendas")
+            if not os.path.isdir("Legendas"):
+                os.mkdir("Legendas")
+            os.chdir("Legendas")
             
             self._extract_legenda(file_name, i)
+            file_name = self.utils.conversor_srt_to_vvt(file_name)
+            self.utils.editing_vtt_file(file_name)
             self.one_drive.upload_file(folder_id, file_name)
+            legenda_id = self.one_drive.get_file_id(folder_id, file_name)
+            filme_db = self.db.get_filme_by_hash(filme_hash)[0]
+            self.db.insert_legenda(folder_id, legenda_id, filme_db[0])
             
             os.chdir(self.absolut_path)
     

@@ -1,3 +1,10 @@
 {
-    "name": "Paixão De Cristo" 
+    "name": "Paixão De Cristo",
+    "legendas": [
+        {
+            "name": "Portugues",
+            "forced": true,
+            "local": "/home/phgodoycosta/Downloads/torrents/Cruzada 2005 [1080p] WWW.BLUDV.COM/Cruzada.2005.1080p.BluRay.5.1.x264.DUAL-WWW.BLUDV.COM.forced.srt"
+        }
+    ]
 }

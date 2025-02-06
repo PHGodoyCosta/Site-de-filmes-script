@@ -123,6 +123,15 @@ class One_Drive:
                 return str(file["id"])
         
         return False
+
+    def get_file_id(self, folder_id, file_name):
+        files = self.list_files(folder_id)
+        
+        for file in files["value"]:
+            if file["name"] == file_name:
+                return str(file["id"])
+        
+        return False
         
     
     def upload_file(self, folder_id, file_path):
