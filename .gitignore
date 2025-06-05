@@ -22,5 +22,7 @@ filme3.mkv
 preload.json
 token_moviedb.key
 Legendas/
-sql.log
+log.sql
 temp.sql
+informations.txt
+unior.py

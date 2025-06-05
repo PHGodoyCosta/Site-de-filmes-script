@@ -13,3 +13,9 @@ INSERT INTO audios (hash, name, folder_id, hls_id, filme_id) VALUES ("6532c754-7
 INSERT INTO audios (hash, name, folder_id, hls_id, filme_id) VALUES ("f4c1394b-99ee-4d96-857f-1b4ee23aac9c", "Português", "1642E726B682B518!166901", "1642E726B682B518!166987", 3);
 
 INSERT INTO audios (hash, name, folder_id, hls_id, filme_id) VALUES ("1d2d65ef-f88b-41c6-a258-aaed23102565", "Inglês", "1642E726B682B518!167050", "1642E726B682B518!167051", 3);
+
+-- Paixão de Cristo:
+
+INSERT INTO audios (hash, name, folder_id, hls_id, filme_id) VALUES ("61134a96-4c6c-4493-a525-e25ffeef75e5", "Português", "1642E726B682B518!167482", "1642E726B682B518!167559", 1);
+
+INSERT INTO audios (hash, name, folder_id, hls_id, filme_id) VALUES ("27277fc8-8968-469b-9248-ace2df12890a", "Inglês", "1642E726B682B518!167611", "1642E726B682B518!167688", 1);

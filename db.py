@@ -8,6 +8,8 @@ class DB:
         load_dotenv()
         self.absolut_path = os.path.dirname(os.path.abspath(__file__))
         self.con = 0
+        self.log("-- Inserindo outro filme...")
+        
         
     def get_con(self):
         self.con = mysql.connector.connect(
@@ -23,7 +25,7 @@ class DB:
         return self.con
 
     def log(self, content):
-        with open(f"{self.absolut_path}/sql.log", "a+") as f:
+        with open(f"{self.absolut_path}/log.sql", "a+") as f:
             f.write(f"\n\n{content}")
 
     def get_filme_by_hash(self, hash):

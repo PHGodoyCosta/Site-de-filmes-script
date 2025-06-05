@@ -79,6 +79,13 @@ class Utils:
         
         return f"{int(runtime / 60)}h {int(runtime % 60)}m"
 
+    def clean_folder_name(self, folder_name):
+        restrict = ['"', "*", ":", "<", ">", "?", "/", "\\", "|", "'"]
+        
+        for r in restrict:
+            folder_name = str(folder_name).replace(r, "")
+            
+        return folder_name
 
 if __name__ == "__main__":
     starter = Utils()

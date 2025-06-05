@@ -207,13 +207,15 @@ class Editor:
     def cutting_files(self, file_path, folder_id, type="movie"):
         if type == "movie":
             try:
-                ffmpeg.input(file_path).output("output.m3u8", c="copy", reset_timestamps=1, f="hls", hls_time=60, hls_list_size=0).run()
+                #ffmpeg.input(file_path).output("output.m3u8", c="copy", reset_timestamps=1, f="hls", hls_time=60, hls_list_size=0, sn=None).run()
+                
+                ffmpeg.input(file_path).output('output.m3u8', vcodec='libx264', preset='ultrafast', crf=23, an=None, reset_timestamps=1, f='hls', hls_time=60, hls_list_size=0).run()
             except ffmpeg.Error as e:
                 print(f"Erro ao cortar o Vídeo: {e}")
                 raise Exception(e)
         elif type == "audio":
             try:
-                ffmpeg.input(file_path).output("output.m3u8", c="copy", f="hls", hls_time=60, hls_list_size=0).run()
+                ffmpeg.input(file_path).output("output.m3u8", c="copy", f="hls", hls_time=60, hls_list_size=0, sn=None).run()
             except ffmpeg.Error as e:
                 print(f"Erro ao cortar o audio: {e}")
                 raise Exception(e)
@@ -272,7 +274,9 @@ class Editor:
         os.chdir("Filme_Video")
         
         try:
-            ffmpeg.input(self.file_path).output(f"filme.{self.file_extension}", an=None, c='copy').run()
+            #ffmpeg.input(self.file_path).output(f"filme.{self.file_extension}", an=None, c='copy').run()
+            
+            ffmpeg.input(self.file_path).output(f"filme.{self.file_extension}", an=None, sn=None, c='copy').run()
         except ffmpeg.Error as e:
             print("Erro ao executar ffmpeg:")
             raise Exception(e)

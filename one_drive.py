@@ -1,4 +1,5 @@
 from auth import Auth
+from utils import Utils
 import os
 import requests
 import json
@@ -6,6 +7,7 @@ import json
 class One_Drive:
     def __init__(self):
         self.auth = Auth()
+        self.utils = Utils()
         #self.access_token = self.auth.get_fixed_access_token()
         self.absolut_path = os.path.dirname(os.path.abspath(__file__))
         self.access_token = str(open(f"{self.absolut_path}/token.key", "r+").read())
@@ -19,6 +21,9 @@ class One_Drive:
             f.write(self.access_token)
         
     def create_folder(self, folder_name, dad_folder_id=None):
+        folder_name = self.utils.clean_folder_name(folder_name)
+        
+        print(folder_name)
         if dad_folder_id == None:
             dad_folder_id = self.filmes_folder_id
             
@@ -38,6 +43,8 @@ class One_Drive:
         req = requests.post(url, headers=headers, json=data)
         
         data = req.json()
+        
+        print(data)
         
         if "error" in data:
             if data["error"]["code"] == "InvalidAuthenticationToken":
