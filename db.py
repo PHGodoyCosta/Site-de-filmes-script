@@ -10,7 +10,6 @@ class DB:
         self.con = 0
         self.log("-- Inserindo outro filme...")
         
-        
     def get_con(self):
         self.con = mysql.connector.connect(
             host=os.getenv("DB_HOST"),

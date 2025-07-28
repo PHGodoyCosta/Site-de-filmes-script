@@ -26,9 +26,6 @@ class Main:
         self.one_drive = One_Drive()
         self.db = DB()
         self.utils = Utils()
-        # print(self.file_name)
-        # print(self.file_path)
-        # print(self.file_extension)
         self.editor = Editor(
             self.file_name, self.file_path, self.file_extension)
         if not tempMode:
@@ -36,9 +33,6 @@ class Main:
                 self.file_name, self.one_drive.filmes_folder_id)
         else:
             self.main_folder_id = "1642E726B682B518!169249"
-
-    # def temp(self):
-    #     self.editor.cutting_files(file)
 
     def extract_and_cut_audios(self, filme_hash):
         audios_folder_id = self.one_drive.create_folder(
@@ -118,31 +112,9 @@ class Main:
         print(f"Filme HASH -> {filme_hash}")
         self.extract_and_cut_audios(filme_hash)
         self.extract_legendas(filme_hash)
-        # self.editor
-
-    def temp(self):
-        faixas = self.editor._list_audios_in_file()
-        print(faixas)
-
-        for i in range(0, len(faixas)):
-            if i == 1:
-                faixa = faixas[i]
-                folder_name = f"Faixa_{i}"
-                file_name = f"{folder_name}.aac"
-
-                self.editor._extrair_audio(i, file_name)
-        # self.editor._extrair_audio(0, "testing_function.aac")
-        # self.editor.cutting_files(f"{self.editor.absolut_path}/Faixa_0/testing_function.aac", "one_drive_folder", type="audio")
-
-    def temp2(self):
-        hash = "1f239017-035b-4659-b3e9-38c799725143"
-
-        self.extract_legendas(hash)
 
 
 if __name__ == "__main__":
     starter = Main(tempMode=False)
     starter.main()
-    # starter.temp2()
-    # starter.extract_legendas()
-    # starter.temp()
+    

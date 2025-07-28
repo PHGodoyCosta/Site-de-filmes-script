@@ -173,6 +173,8 @@ class One_Drive:
                 
                 if req.status_code not in [200, 201, 202]:
                     print(f"Erro no upload: {data}")
+                    if data["error"]["code"] == "unauthenticated":
+                        self.refresh_access_token()
                     break
 
                 chunk_start += chunk_length
